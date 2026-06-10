@@ -1,0 +1,81 @@
+@import "tailwindcss";
+
+@theme {
+  --color-grain-green: #2E7D32;
+  --color-grain-green-dark: #1B5E20;
+  --color-grain-green-light: #E8F5E9;
+  
+  --color-grain-gold: #D4A017;
+  --color-grain-gold-dark: #B8860B;
+  --color-grain-gold-light: #F9E79F;
+  
+  --color-grain-brown: #6D4C41;
+  --color-grain-cream: #FAF7F0;
+  
+  --font-poppins: "Poppins", sans-serif;
+  --font-montserrat: "Montserrat", sans-serif;
+  --font-open-sans: "Open Sans", sans-serif;
+
+  --animate-float: float 3s ease-in-out infinite;
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+}
+
+@layer base {
+  body {
+    @apply bg-grain-cream font-poppins text-gray-800;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-montserrat font-bold;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-grain-green text-white px-6 py-3 rounded-lg font-semibold hover:bg-grain-green-dark transition-all duration-300 shadow-md hover:shadow-lg active:scale-95 flex items-center justify-center gap-2;
+  }
+  
+  .btn-secondary {
+    @apply bg-grain-gold text-white px-6 py-3 rounded-lg font-semibold hover:bg-grain-gold-dark transition-all duration-300 shadow-md hover:shadow-lg active:scale-95 flex items-center justify-center gap-2;
+  }
+  
+  .btn-outline {
+    @apply border-2 border-grain-green text-grain-green px-6 py-3 rounded-lg font-semibold hover:bg-grain-green hover:text-white transition-all duration-300 flex items-center justify-center gap-2;
+  }
+
+  .card-premium {
+    @apply bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 border border-gray-100;
+  }
+
+  .glass-header {
+    @apply bg-white/80 backdrop-blur-md border-b border-white/20;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-grain-cream;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-grain-green/30 rounded-full hover:bg-grain-green/50 transition-colors;
+}
+
+.animate-in-view {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.is-in-view {
+  opacity: 1;
+  transform: translateY(0);
+  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
