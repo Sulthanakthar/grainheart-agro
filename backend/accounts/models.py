@@ -145,3 +145,25 @@ class DealerDocument(BaseModel):
 
     def __str__(self):
         return f"{self.get_document_type_display()} for {self.dealer.dealer_code}"
+
+import uuid
+
+class OTPVerification(models.Model):
+    PURPOSE_CHOICES = (
+        ('login', 'Login'),
+        ('password_reset', 'Password Reset'),
+    )
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="otp_verifications")
+    session_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    otp_code = models.CharField(max_length=6)
+    purpose = models.CharField(max_length=20, choices=PURPOSE_CHOICES, default='login')
+    is_verified = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def is_expired(self):
+        return timezone.now() > self.created_at + timezone.timedelta(minutes=5)
+
+    def __str__(self):
+        return f"OTP for {self.user.username} - {self.purpose} (Verified: {self.is_verified})"
+
