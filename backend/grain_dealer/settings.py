@@ -44,6 +44,12 @@ INSTALLED_APPS = [
 
     # Local Apps
     'accounts',
+    'products',
+    'inventory',
+    'orders',
+    'payments',
+    'crm',
+    'reports',
 ]
 
 AUTH_USER_MODEL = 'accounts.User'

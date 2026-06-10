@@ -10,3 +10,5 @@ cryptography>=42.0.0
 # Fallback driver in case compiling mysqlclient fails on Windows
 PyMySQL>=1.1.0
 gunicorn>=21.2.0
+Pillow>=10.0.0
+
