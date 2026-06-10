@@ -78,3 +78,19 @@ class Review(BaseModel):
 
     def __str__(self):
         return f"Review by {self.customer.username} on {self.product.name} ({self.rating}/5)"
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+@receiver(post_save, sender=Product)
+def create_or_update_product_inventory(sender, instance, created, **kwargs):
+    from inventory.models import Inventory
+    # Create or update Inventory record
+    inventory, created_inv = Inventory.objects.get_or_create(
+        product=instance,
+        defaults={'available_stock': instance.stock}
+    )
+    if not created_inv and inventory.available_stock != instance.stock:
+        inventory.available_stock = instance.stock
+        inventory.save()
+

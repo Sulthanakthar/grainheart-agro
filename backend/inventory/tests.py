@@ -16,12 +16,14 @@ class InventoryModelTests(TestCase):
             sku="TD-PREM-001",
             weight=1.00
         )
-        self.inventory = Inventory.objects.create(
-            product=self.product,
-            available_stock=100,
-            reserved_stock=10,
-            reorder_level=15
-        )
+        # The product creation signal automatically creates the Inventory record.
+        # We retrieve it and update its fields.
+        self.inventory = self.product.inventory
+        self.inventory.available_stock = 100
+        self.inventory.reserved_stock = 10
+        self.inventory.reorder_level = 15
+        self.inventory.save()
+
 
     def test_inventory_details(self):
         self.assertEqual(self.inventory.product, self.product)
