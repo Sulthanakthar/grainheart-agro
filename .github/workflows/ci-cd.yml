@@ -1,0 +1,125 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  backend-tests:
+    runs-on: ubuntu-latest
+    
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: grain_dealer_db
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+        
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: --health-cmd="redis-cli ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-node: '3.12'
+          cache: 'pip'
+          cache-dependency-path: 'backend/requirements.txt'
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y default-libmysqlclient-dev pkg-config build-essential
+
+      - name: Install Python Dependencies
+        run: |
+          cd backend
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Set up Environment Variables
+        run: |
+          cd backend
+          cp .env.example .env
+          echo "DATABASE_URL=mysql://root:root@127.0.0.1:3306/grain_dealer_db" >> .env
+          echo "CELERY_BROKER_URL=redis://127.0.0.1:6379/0" >> .env
+          echo "CELERY_RESULT_BACKEND=redis://127.0.0.1:6379/0" >> .env
+          echo "SECRET_KEY=django-insecure-test-key-for-github-actions-runs" >> .env
+          echo "DEBUG=True" >> .env
+
+      - name: Run Django Security Deploy Check
+        run: |
+          cd backend
+          python manage.py check --deploy
+
+      - name: Run Django Migrations & Test Suite
+        run: |
+          cd backend
+          python manage.py migrate
+          python manage.py test
+
+  frontend-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
+
+      - name: Install Dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Build Frontend Application
+        run: |
+          cd frontend
+          npm run build
+
+  docker-verify:
+    runs-on: ubuntu-latest
+    needs: [backend-tests, frontend-build]
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Verify Docker Compose Config
+        run: |
+          docker compose config
+
+      - name: Dry Run Docker Build (Backend)
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./docker/backend.Dockerfile
+          push: false
+          tags: grain_backend:latest
+
+      - name: Dry Run Docker Build (Frontend)
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./docker/frontend.Dockerfile
+          push: false
+          tags: grain_frontend:latest
