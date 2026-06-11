@@ -4,8 +4,9 @@ from django.contrib.auth import get_user_model
 from django.utils import timezone
 from rest_framework.test import APITestCase
 from rest_framework import status
-from accounts.models import Customer, Dealer, OTPVerification, Territory
+from accounts.models import Customer, Dealer, OTPVerification, Territory, Commission
 from accounts.permissions import IsAdminRole, IsSalesRole, IsInventoryRole, IsDealerRole, IsCustomerRole, IsEmployee
+from products.models import Category, QualityGrade, Product
 
 User = get_user_model()
 
@@ -322,3 +323,141 @@ class RBACPermissionsTests(TestCase):
         self.assertTrue(perm.has_permission(self.DummyRequest(self.inventory_user), None))
         self.assertFalse(perm.has_permission(self.DummyRequest(self.dealer_user), None))
         self.assertFalse(perm.has_permission(self.DummyRequest(self.customer_user), None))
+
+
+class DealerManagementAPITests(APITestCase):
+    def setUp(self):
+        self.admin = User.objects.create_user(username='admin', email='a@a.com', password='Password123!', role='admin')
+        self.customer = User.objects.create_user(username='cust', email='c@c.com', password='Password123!', role='customer')
+        self.dealer_user = User.objects.create_user(username='dlr', email='d@d.com', password='Password123!', role='dealer')
+        
+        self.territory = Territory.objects.create(territory_name="Malleswaram", district="Bangalore", state="Karnataka")
+        
+        self.dealer = Dealer.objects.create(
+            user=self.dealer_user,
+            dealer_code="DL-TEST1234",
+            business_name="Test Dealer Grains",
+            owner_name="Owner Joe",
+            phone="9000000000",
+            email="d@d.com",
+            gst_number="29ABCDE1234F1Z5",
+            pan_number="ABCDE1234E",
+            territory=self.territory,
+            commission_rate=5.00,
+            status="pending_verification"
+        )
+        
+        self.territory_list_url = reverse('territory_list_create')
+        self.dealer_list_url = reverse('dealer_list')
+        self.dealer_approve_url = reverse('dealer_approve', kwargs={'pk': self.dealer.pk})
+        self.doc_upload_url = reverse('dealer_document_upload')
+        self.commission_list_url = reverse('commission_list')
+        self.analytics_url = reverse('dealer_analytics')
+
+    def test_territory_crud_rbac(self):
+        # Customer fails
+        self.client.force_authenticate(user=self.customer)
+        response = self.client.post(self.territory_list_url, {
+            'territory_name': 'Jayanagar', 'district': 'Bangalore', 'state': 'Karnataka'
+        })
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        # Admin succeeds
+        self.client.force_authenticate(user=self.admin)
+        response = self.client.post(self.territory_list_url, {
+            'territory_name': 'Jayanagar', 'district': 'Bangalore', 'state': 'Karnataka'
+        })
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(Territory.objects.filter(territory_name='Jayanagar').exists())
+
+    def test_dealer_onboarding_approval(self):
+        self.client.force_authenticate(user=self.admin)
+        
+        response = self.client.post(self.dealer_approve_url, {
+            'status': 'active', 'commission_rate': 4.50
+        })
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        self.dealer.refresh_from_db()
+        self.assertEqual(self.dealer.status, 'active')
+        self.assertEqual(float(self.dealer.commission_rate), 4.50)
+        self.assertIsNotNone(self.dealer.approval_date)
+        
+        self.dealer_user.refresh_from_db()
+        self.assertTrue(self.dealer_user.is_active)
+
+    def test_dealer_document_verification(self):
+        self.client.force_authenticate(user=self.dealer_user)
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        
+        temp_file = SimpleUploadedFile("gst.pdf", b"pdfcontent", content_type="application/pdf")
+        response = self.client.post(self.doc_upload_url, {
+            'document_type': 'gst_registration',
+            'document_file': temp_file
+        })
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        doc_id = response.data['id']
+        
+        self.client.force_authenticate(user=self.admin)
+        verify_url = reverse('dealer_document_verify', kwargs={'pk': doc_id})
+        response = self.client.post(verify_url, {'status': 'verified'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['verification_status'], 'verified')
+
+    def test_commission_ledger_analytics_and_signals(self):
+        # 1. Activate Dealer
+        self.dealer.status = 'active'
+        self.dealer.save()
+
+        # Create Category, QualityGrade, and Product
+        category = Category.objects.create(name="Grains", slug="grains")
+        grade = QualityGrade.objects.create(name="Sortex", priority=2)
+        product = Product.objects.create(
+            category=category, quality_grade=grade, name="Wheat", price=100.00, stock=500, sku="WH-TEST", weight=1.00
+        )
+
+        # 2. Setup Customer matching territory state/district
+        Customer.objects.create(
+            user=self.customer, phone="99", address="456 Main", city="Bangalore", state="Karnataka"
+        )
+        
+        # Place order
+        self.client.force_authenticate(user=self.customer)
+        self.client.post(reverse('cart_add_item'), {'product': product.id, 'quantity': 10})
+        checkout_res = self.client.post(reverse('order_create'), {'delivery_address': 'Bangalore', 'payment_method': 'cash'})
+        order_number = checkout_res.data['order_number']
+
+        # 3. Transition order status to delivered to trigger signal
+        self.client.force_authenticate(user=self.admin)
+        status_url = reverse('order_status_update', kwargs={'order_number': order_number})
+        response = self.client.put(status_url, {'order_status': 'delivered'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # 4. Verify Commission and Performance created
+        self.assertTrue(Commission.objects.filter(order__order_number=order_number).exists())
+        commission = Commission.objects.get(order__order_number=order_number)
+        self.assertEqual(commission.dealer, self.dealer)
+        self.assertEqual(float(commission.commission_amount), 1050.00 * 0.05)
+
+        # 5. Check Payout
+        payout_url = reverse('commission_payout', kwargs={'pk': commission.pk})
+        response = self.client.post(payout_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        commission.refresh_from_db()
+        self.assertEqual(commission.payout_status, 'paid')
+
+        # 6. Verify Analytics
+        # Dealer analytics
+        self.client.force_authenticate(user=self.dealer_user)
+        response = self.client.get(self.analytics_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['mode'], 'dealer')
+        self.assertEqual(float(response.data['summary']['total_sales']), 1050.00)
+        self.assertEqual(float(response.data['summary']['paid_payout']), 52.50)
+
+        # Admin analytics
+        self.client.force_authenticate(user=self.admin)
+        response = self.client.get(self.analytics_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['mode'], 'global')
+

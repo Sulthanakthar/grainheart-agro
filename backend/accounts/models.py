@@ -167,3 +167,102 @@ class OTPVerification(models.Model):
     def __str__(self):
         return f"OTP for {self.user.username} - {self.purpose} (Verified: {self.is_verified})"
 
+
+class Commission(BaseModel):
+    PAYOUT_STATUS_CHOICES = (
+        ('pending', 'Pending Payout'),
+        ('paid', 'Paid'),
+        ('cancelled', 'Cancelled'),
+    )
+    dealer = models.ForeignKey(Dealer, on_delete=models.CASCADE, related_name="commissions")
+    order = models.ForeignKey('orders.Order', on_delete=models.CASCADE, related_name="commissions")
+    sales_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    commission_percentage = models.DecimalField(max_digits=4, decimal_places=2, default=2.00)
+    commission_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    payout_status = models.CharField(max_length=30, choices=PAYOUT_STATUS_CHOICES, default='pending')
+    payout_date = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Commission: ₹{self.commission_amount} for {self.dealer.business_name} on Order {self.order.order_number}"
+
+
+class DealerPerformance(models.Model):
+    dealer = models.ForeignKey(Dealer, on_delete=models.CASCADE, related_name="performance_metrics")
+    month = models.CharField(max_length=7)  # YYYY-MM
+    total_orders = models.IntegerField(default=0)
+    total_sales = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    total_customers = models.IntegerField(default=0)
+    growth_percentage = models.DecimalField(max_digits=6, decimal_places=2, default=0.00)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('dealer', 'month')
+
+    def __str__(self):
+        return f"Performance for {self.dealer.business_name} - {self.month}"
+
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+@receiver(post_save, sender='orders.Order')
+def create_dealer_commission_on_delivery(sender, instance, created, **kwargs):
+    if instance.order_status == 'delivered':
+        dealer = None
+        # 1. Check if customer is a dealer themselves
+        if instance.customer.role == 'dealer':
+            try:
+                dealer = instance.customer.dealer_profile
+            except Exception:
+                pass
+        
+        # 2. Check if customer's region/territory maps to a dealer
+        if not dealer:
+            try:
+                customer_profile = instance.customer.customer_profile
+                territory = Territory.objects.filter(
+                    models.Q(district__iexact=customer_profile.city) | 
+                    models.Q(state__iexact=customer_profile.state)
+                ).first()
+                if territory:
+                    dealer = Dealer.objects.filter(territory=territory, status='active').first()
+            except Exception:
+                pass
+                
+        # 3. Write commission record if active dealer is found
+        if dealer and dealer.status == 'active':
+            if not Commission.objects.filter(order=instance).exists():
+                sales_amount = instance.total_amount
+                commission_pct = dealer.commission_rate
+                commission_amt = sales_amount * (commission_pct / 100)
+                
+                Commission.objects.create(
+                    dealer=dealer,
+                    order=instance,
+                    sales_amount=sales_amount,
+                    commission_percentage=commission_pct,
+                    commission_amount=commission_amt,
+                    payout_status='pending'
+                )
+
+                # Dynamically update monthly dealer performance
+                month_str = timezone.now().strftime("%Y-%m")
+                perf, perf_created = DealerPerformance.objects.get_or_create(
+                    dealer=dealer,
+                    month=month_str
+                )
+                perf.total_orders += 1
+                from decimal import Decimal
+                perf.total_sales = Decimal(str(perf.total_sales)) + Decimal(str(sales_amount))
+                
+                # Simple approximation for unique customers matching this dealer
+                from orders.models import Order
+                unique_cust = Order.objects.filter(
+                    commissions__dealer=dealer,
+                    created_at__year=timezone.now().year,
+                    created_at__month=timezone.now().month
+                ).values('customer').distinct().count()
+                perf.total_customers = unique_cust
+                perf.save()
+
+

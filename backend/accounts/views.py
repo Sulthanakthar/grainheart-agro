@@ -10,7 +10,7 @@ import redis
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status, permissions
+from rest_framework import status, permissions, generics
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 
@@ -282,3 +282,224 @@ class UserProfileView(APIView):
                 serializer.save()
                 return Response(serializer.data)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+from django.db import models
+from .permissions import IsAdminRole, IsSalesRole, IsInventoryRole, IsDealerRole, IsCustomerRole, IsEmployee
+from .models import Territory, Dealer, DealerDocument, Commission, DealerPerformance
+from .serializers import (
+    TerritorySerializer,
+    DealerAdminSerializer,
+    DealerApprovalSerializer,
+    DealerDocumentSerializer,
+    CommissionSerializer,
+    DealerPerformanceSerializer
+)
+
+class TerritoryListCreateView(generics.ListCreateAPIView):
+    queryset = Territory.objects.all().order_by('territory_name')
+    serializer_class = TerritorySerializer
+
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [permissions.IsAuthenticated()]
+        return [permissions.IsAuthenticated(), IsEmployee()]
+
+class TerritoryDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Territory.objects.all()
+    serializer_class = TerritorySerializer
+
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [permissions.IsAuthenticated()]
+        return [permissions.IsAuthenticated(), IsEmployee()]
+
+class DealerListView(generics.ListAPIView):
+    queryset = Dealer.objects.all().order_by('-created_at')
+    serializer_class = DealerAdminSerializer
+    permission_classes = (permissions.IsAuthenticated, IsEmployee)
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        status_param = self.request.query_params.get('status')
+        if status_param:
+            queryset = queryset.filter(status=status_param)
+        return queryset
+
+class DealerDetailView(generics.RetrieveUpdateAPIView):
+    queryset = Dealer.objects.all()
+    serializer_class = DealerAdminSerializer
+    permission_classes = (permissions.IsAuthenticated, IsEmployee)
+
+class DealerApprovalView(APIView):
+    permission_classes = (permissions.IsAuthenticated, IsAdminRole)
+
+    def post(self, request, pk):
+        try:
+            dealer = Dealer.objects.get(pk=pk)
+        except Dealer.DoesNotExist:
+            return Response({"error": "Dealer profile not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = DealerApprovalSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        new_status = serializer.validated_data['status']
+        rate = serializer.validated_data.get('commission_rate')
+
+        with transaction.atomic():
+            dealer.status = new_status
+            if new_status == 'active':
+                dealer.approval_date = timezone.now()
+                dealer.user.is_active = True
+                dealer.user.save()
+            if rate is not None:
+                dealer.commission_rate = rate
+            dealer.save()
+
+        return Response(DealerAdminSerializer(dealer).data, status=status.HTTP_200_OK)
+
+class DealerDocumentUploadView(APIView):
+    permission_classes = (permissions.IsAuthenticated, IsDealerRole)
+
+    def post(self, request):
+        try:
+            dealer = request.user.dealer_profile
+        except Dealer.DoesNotExist:
+            return Response({"error": "Dealer profile not found for this account."}, status=status.HTTP_400_BAD_REQUEST)
+
+        doc_type = request.data.get('document_type')
+        doc_file = request.FILES.get('document_file')
+
+        if not doc_type or not doc_file:
+            return Response({"error": "document_type and document_file are required fields."}, status=status.HTTP_400_BAD_REQUEST)
+
+        doc = DealerDocument.objects.create(
+            dealer=dealer,
+            document_type=doc_type,
+            document_file=doc_file,
+            verification_status='pending'
+        )
+
+        return Response(DealerDocumentSerializer(doc).data, status=status.HTTP_201_CREATED)
+
+class DealerDocumentVerifyView(APIView):
+    permission_classes = (permissions.IsAuthenticated, IsEmployee)
+
+    def post(self, request, pk):
+        try:
+            doc = DealerDocument.objects.get(pk=pk)
+        except DealerDocument.DoesNotExist:
+            return Response({"error": "Document not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        new_status = request.data.get('status')
+        if new_status not in ['verified', 'rejected']:
+            return Response({"error": "Invalid verification status choice. Use 'verified' or 'rejected'."}, status=status.HTTP_400_BAD_REQUEST)
+
+        doc.verification_status = new_status
+        doc.save()
+
+        return Response(DealerDocumentSerializer(doc).data, status=status.HTTP_200_OK)
+
+class CommissionListView(generics.ListAPIView):
+    serializer_class = CommissionSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role in ['admin', 'sales', 'inventory']:
+            queryset = Commission.objects.all().order_by('-created_at')
+            dealer_id = self.request.query_params.get('dealer_id')
+            if dealer_id:
+                queryset = queryset.filter(dealer_id=dealer_id)
+        else:
+            try:
+                dealer = user.dealer_profile
+                queryset = Commission.objects.filter(dealer=dealer).order_by('-created_at')
+            except Dealer.DoesNotExist:
+                queryset = Commission.objects.none()
+
+        payout_status = self.request.query_params.get('payout_status')
+        if payout_status:
+            queryset = queryset.filter(payout_status=payout_status)
+
+        return queryset
+
+class CommissionPayoutView(APIView):
+    permission_classes = (permissions.IsAuthenticated, IsAdminRole)
+
+    def post(self, request, pk):
+        try:
+            commission = Commission.objects.get(pk=pk)
+        except Commission.DoesNotExist:
+            return Response({"error": "Commission ledger entry not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        if commission.payout_status == 'paid':
+            return Response({"error": "Commission is already marked as paid."}, status=status.HTTP_400_BAD_REQUEST)
+
+        commission.payout_status = 'paid'
+        commission.payout_date = timezone.now()
+        commission.save()
+
+        return Response(CommissionSerializer(commission).data, status=status.HTTP_200_OK)
+
+class DealerAnalyticsView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request):
+        user = request.user
+        is_employee = user.role in ['admin', 'sales', 'inventory']
+
+        if is_employee:
+            # Executive/Global Dealer Analytics
+            total_sales = Commission.objects.aggregate(sum=models.Sum('sales_amount'))['sum'] or 0.00
+            total_commissions = Commission.objects.aggregate(sum=models.Sum('commission_amount'))['sum'] or 0.00
+            pending_payout = Commission.objects.filter(payout_status='pending').aggregate(sum=models.Sum('commission_amount'))['sum'] or 0.00
+            paid_payout = Commission.objects.filter(payout_status='paid').aggregate(sum=models.Sum('commission_amount'))['sum'] or 0.00
+            
+            dealers_count = Dealer.objects.count()
+            active_dealers = Dealer.objects.filter(status='active').count()
+
+            # State-wise distribution
+            state_data = Dealer.objects.annotate(state=models.F('territory__state')).values('state').annotate(count=models.Count('id'))
+
+            return Response({
+                "mode": "global",
+                "summary": {
+                    "total_sales": total_sales,
+                    "total_commissions": total_commissions,
+                    "pending_payout": pending_payout,
+                    "paid_payout": paid_payout,
+                    "dealers_count": dealers_count,
+                    "active_dealers": active_dealers
+                },
+                "state_wise_distribution": state_data
+            })
+        else:
+            # Individual Dealer Analytics
+            try:
+                dealer = user.dealer_profile
+            except Dealer.DoesNotExist:
+                return Response({"error": "Dealer profile not found."}, status=status.HTTP_400_BAD_REQUEST)
+
+            commissions = Commission.objects.filter(dealer=dealer)
+            total_sales = commissions.aggregate(sum=models.Sum('sales_amount'))['sum'] or 0.00
+            total_commissions = commissions.aggregate(sum=models.Sum('commission_amount'))['sum'] or 0.00
+            pending_payout = commissions.filter(payout_status='pending').aggregate(sum=models.Sum('commission_amount'))['sum'] or 0.00
+            paid_payout = commissions.filter(payout_status='paid').aggregate(sum=models.Sum('commission_amount'))['sum'] or 0.00
+
+            # Performance reviews list
+            perf = DealerPerformance.objects.filter(dealer=dealer).order_by('-month')
+            perf_serializer = DealerPerformanceSerializer(perf, many=True)
+
+            return Response({
+                "mode": "dealer",
+                "summary": {
+                    "total_sales": total_sales,
+                    "total_commissions": total_commissions,
+                    "pending_payout": pending_payout,
+                    "paid_payout": paid_payout
+                },
+                "monthly_performance": perf_serializer.data
+            })
+

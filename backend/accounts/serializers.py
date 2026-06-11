@@ -241,3 +241,70 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
 
         attrs['otp_verification'] = otp_verification
         return attrs
+
+
+class TerritorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Territory
+        fields = ('id', 'territory_name', 'district', 'state', 'country', 'manager_name', 'status', 'created_at', 'updated_at')
+        read_only_fields = ('id', 'created_at', 'updated_at')
+
+
+from .models import DealerDocument, Commission, DealerPerformance
+
+class DealerDocumentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DealerDocument
+        fields = ('id', 'dealer', 'document_type', 'document_file', 'verification_status', 'uploaded_at')
+        read_only_fields = ('id', 'uploaded_at')
+
+
+class DealerAdminSerializer(serializers.ModelSerializer):
+    user = UserProfileSerializer(read_only=True)
+    territory_details = TerritorySerializer(source='territory', read_only=True)
+    documents = DealerDocumentSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Dealer
+        fields = (
+            'id', 'user', 'dealer_code', 'business_name', 'owner_name', 'phone', 'email', 
+            'gst_number', 'pan_number', 'territory', 'territory_details', 'commission_rate', 
+            'status', 'approval_date', 'documents', 'created_at', 'updated_at'
+        )
+        read_only_fields = ('id', 'dealer_code', 'approval_date', 'created_at', 'updated_at')
+
+
+class DealerApprovalSerializer(serializers.Serializer):
+    status = serializers.ChoiceField(
+        choices=(('active', 'Active'), ('suspended', 'Suspended'), ('rejected', 'Rejected')),
+        required=True
+    )
+    commission_rate = serializers.DecimalField(max_digits=4, decimal_places=2, required=False)
+
+
+class CommissionSerializer(serializers.ModelSerializer):
+    dealer_business_name = serializers.CharField(source='dealer.business_name', read_only=True)
+    order_number = serializers.CharField(source='order.order_number', read_only=True)
+
+    class Meta:
+        model = Commission
+        fields = (
+            'id', 'dealer', 'dealer_business_name', 'order', 'order_number', 
+            'sales_amount', 'commission_percentage', 'commission_amount', 
+            'payout_status', 'payout_date', 'created_at', 'updated_at'
+        )
+        read_only_fields = (
+            'id', 'dealer', 'dealer_business_name', 'order', 'order_number', 
+            'sales_amount', 'commission_percentage', 'commission_amount', 
+            'created_at', 'updated_at'
+        )
+
+
+class DealerPerformanceSerializer(serializers.ModelSerializer):
+    dealer_business_name = serializers.CharField(source='dealer.business_name', read_only=True)
+
+    class Meta:
+        model = DealerPerformance
+        fields = ('id', 'dealer', 'dealer_business_name', 'month', 'total_orders', 'total_sales', 'total_customers', 'growth_percentage', 'updated_at')
+        read_only_fields = ('id', 'updated_at')
+
