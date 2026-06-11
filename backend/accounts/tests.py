@@ -461,3 +461,141 @@ class DealerManagementAPITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['mode'], 'global')
 
+
+from django.core.management import call_command
+from crm.models import Enquiry, Lead
+from products.models import SEOMetadata
+from accounts.models import AuditLog
+from datetime import timedelta
+
+class Phase9SecurityAndSEOTests(TestCase):
+    def setUp(self):
+        # Create users
+        self.admin = User.objects.create_user(
+            username="admin_p9", email="admin_p9@test.com", password="Password123!", role="admin"
+        )
+        self.sales = User.objects.create_user(
+            username="sales_p9", email="sales_p9@test.com", password="Password123!", role="sales"
+        )
+        self.customer = User.objects.create_user(
+            username="cust_p9", email="cust_p9@test.com", password="Password123!", role="customer"
+        )
+
+        # Setup paths and products
+        self.category = Category.objects.create(name="Rice", slug="rice")
+        self.grade = QualityGrade.objects.create(name="Sortex Premium", priority=1)
+        self.product = Product.objects.create(
+            category=self.category,
+            quality_grade=self.grade,
+            name="Premium Rice Grains",
+            slug="premium-rice-grains",
+            price=200.00,
+            stock=100,
+            sku="RI-PREM-001",
+            weight=5.00
+        )
+
+        # URLs
+        self.login_url = reverse('auth_login')
+        self.verify_otp_url = reverse('auth_verify_otp')
+        self.robots_url = reverse('robots_txt')
+        self.sitemap_url = reverse('sitemap_xml')
+        self.seo_url = reverse('seo_metadata')
+
+    def test_audit_logging_auth_flow(self):
+        # 1. Start Login -> OTP Dispatch
+        login_payload = {
+            'username': 'cust_p9',
+            'password': 'Password123!'
+        }
+        response = self.client.post(self.login_url, login_payload, HTTP_USER_AGENT="Mozilla/Test", REMOTE_ADDR="192.168.1.1")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        session_id = response.data['session_id']
+        otp_entry = OTPVerification.objects.get(session_id=session_id)
+
+        # Check request_otp_login audit log exists
+        audit_otp = AuditLog.objects.filter(action="request_otp_login").first()
+        self.assertIsNotNone(audit_otp)
+        self.assertEqual(audit_otp.user, self.customer)
+        self.assertEqual(audit_otp.ip_address, "192.168.1.1")
+        self.assertEqual(audit_otp.user_agent, "Mozilla/Test")
+
+        # 2. Verify OTP -> Login Success
+        verify_payload = {
+            'session_id': session_id,
+            'otp_code': otp_entry.otp_code
+        }
+        response = self.client.post(self.verify_otp_url, verify_payload, HTTP_USER_AGENT="Mozilla/Test2", REMOTE_ADDR="192.168.1.2")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Check login_success audit log exists
+        audit_success = AuditLog.objects.filter(action="login_success").first()
+        self.assertIsNotNone(audit_success)
+        self.assertEqual(audit_success.user, self.customer)
+        self.assertEqual(audit_success.ip_address, "192.168.1.2")
+        self.assertEqual(audit_success.user_agent, "Mozilla/Test2")
+
+    def test_dynamic_robots_and_sitemap(self):
+        # 1. Robots.txt
+        response = self.client.get(self.robots_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response['Content-Type'], 'text/plain')
+        self.assertIn("robots.txt", self.robots_url)
+        content = response.content.decode()
+        self.assertIn("User-agent: *", content)
+        self.assertIn("Disallow: /admin/", content)
+        self.assertIn("sitemap.xml", content)
+
+        # 2. Sitemap.xml
+        response = self.client.get(self.sitemap_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response['Content-Type'], 'application/xml')
+        xml_content = response.content.decode()
+        self.assertIn("<urlset", xml_content)
+        self.assertIn("categories/rice", xml_content)
+        self.assertIn("products/premium-rice-grains", xml_content)
+
+    def test_dynamic_seo_metadata_api(self):
+        # 1. Fetch dynamic default product SEO metadata
+        response = self.client.get(f"{self.seo_url}?path=/products/premium-rice-grains")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['meta_title'], "Premium Rice Grains (Sortex Premium) | Healthy Grains, Happy Families")
+        
+        # 2. Fetch specific database-defined SEO metadata
+        SEOMetadata.objects.create(
+            path="/about-us",
+            meta_title="About Us | Grain Dealer",
+            meta_description="Read about our history and values."
+        )
+        response = self.client.get(f"{self.seo_url}?path=/about-us")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['meta_title'], "About Us | Grain Dealer")
+        self.assertEqual(response.data['meta_description'], "Read about our history and values.")
+
+    def test_gdpr_data_purge_command(self):
+        # 1. Create Enquiry and Lead
+        enq = Enquiry.objects.create(
+            enquiry_number="ENQ-GDPR",
+            customer_name="Old Customer",
+            email="old@test.com",
+            phone="111",
+            enquiry_type="general",
+            status="closed"
+        )
+        lead = Lead.objects.get(enquiry=enq)
+        lead.lead_status = 'converted'
+        lead.save()
+
+        # 2. Force creation date back by 4 years
+        four_years_ago = timezone.now() - timedelta(days=4 * 365)
+        Enquiry.objects.filter(id=enq.id).update(created_at=four_years_ago)
+        Lead.objects.filter(id=lead.id).update(created_at=four_years_ago)
+
+        # 3. Call Purge command
+        call_command('purge_expired_data')
+
+        # 4. Verify deleted
+        self.assertFalse(Enquiry.objects.filter(id=enq.id).exists())
+        self.assertFalse(Lead.objects.filter(id=lead.id).exists())
+
+

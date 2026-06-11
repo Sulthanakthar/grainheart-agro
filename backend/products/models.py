@@ -94,3 +94,23 @@ def create_or_update_product_inventory(sender, instance, created, **kwargs):
         inventory.available_stock = instance.stock
         inventory.save()
 
+
+class SEOMetadata(models.Model):
+    path = models.CharField(max_length=255, unique=True, db_index=True)
+    meta_title = models.CharField(max_length=255)
+    meta_description = models.TextField(blank=True)
+    meta_keywords = models.CharField(max_length=255, blank=True)
+    og_title = models.CharField(max_length=255, blank=True)
+    og_description = models.TextField(blank=True)
+    og_image = models.CharField(max_length=255, blank=True)
+    canonical_url = models.CharField(max_length=255, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"SEO: {self.path}"
+
+    class Meta:
+        verbose_name_plural = "SEO Metadata"
+
+

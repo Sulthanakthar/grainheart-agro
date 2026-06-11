@@ -17,9 +17,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from accounts.views import HealthCheckView
+from grain_dealer.views import RobotsTxtView, SitemapXmlView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('robots.txt', RobotsTxtView.as_view(), name='robots_txt'),
+    path('sitemap.xml', SitemapXmlView.as_view(), name='sitemap_xml'),
     path('api/health/', HealthCheckView.as_view(), name='health_check'),
     path('api/v1/', include('accounts.urls')),
     path('api/v1/', include('products.urls')),

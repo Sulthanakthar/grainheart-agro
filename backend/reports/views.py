@@ -77,11 +77,15 @@ class ReportListCreateView(generics.ListCreateAPIView):
             # To provide immediate response with the report object, we can run the task directly.
             report_id = generate_report_task(request.user.id, report_type, start_date_str, end_date_str)
             report_obj = Report.objects.get(id=report_id)
+            from accounts.models import log_action
+            log_action(request.user, "generate_report", request, f"Report: {report_obj.report_name}, Type: {report_type}")
             return Response(ReportSerializer(report_obj).data, status=status.HTTP_201_CREATED)
         except Exception as e:
             # Fallback
             report_id = generate_report_task(request.user.id, report_type, start_date_str, end_date_str)
             report_obj = Report.objects.get(id=report_id)
+            from accounts.models import log_action
+            log_action(request.user, "generate_report", request, f"Report: {report_obj.report_name}, Type: {report_type} (Fallback)")
             return Response(ReportSerializer(report_obj).data, status=status.HTTP_201_CREATED)
 
 
@@ -114,6 +118,9 @@ class ReportDownloadView(APIView):
         if not os.path.exists(filepath):
             return Response({"error": "Physical report file does not exist on disk."}, status=status.HTTP_404_NOT_FOUND)
             
+        from accounts.models import log_action
+        log_action(request.user, "download_report", request, f"Report: {report.report_name}, ID: {report.id}")
+
         response = FileResponse(open(filepath, 'rb'), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         response['Content-Disposition'] = f'attachment; filename="{os.path.basename(filepath)}"'
         return response

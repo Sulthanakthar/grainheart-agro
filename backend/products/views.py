@@ -2,14 +2,15 @@ from rest_framework import generics, permissions, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.db import models
-from .models import Category, QualityGrade, Product, ProductImage, Wishlist, Review
+from .models import Category, QualityGrade, Product, ProductImage, Wishlist, Review, SEOMetadata
 from .serializers import (
     CategorySerializer,
     QualityGradeSerializer,
     ProductListSerializer,
     ProductDetailSerializer,
     ReviewSerializer,
-    WishlistSerializer
+    WishlistSerializer,
+    SEOMetadataSerializer
 )
 
 class IsAdminOrInventory(permissions.BasePermission):
@@ -183,3 +184,66 @@ class WishlistDestroyView(APIView):
             return Response({"message": "Product removed from wishlist."}, status=status.HTTP_200_OK)
         except Wishlist.DoesNotExist:
             return Response({"error": "Product not found in your wishlist."}, status=status.HTTP_404_NOT_FOUND)
+
+class SEOMetadataView(APIView):
+    permission_classes = (permissions.AllowAny,)
+
+    def get(self, request):
+        path = request.query_params.get('path')
+        if not path:
+            return Response({"error": "path parameter is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if path.endswith('/') and len(path) > 1:
+            path = path[:-1]
+
+        try:
+            seo = SEOMetadata.objects.get(path=path)
+            serializer = SEOMetadataSerializer(seo)
+            return Response(serializer.data)
+        except SEOMetadata.DoesNotExist:
+            # Dynamic defaults
+            if path.startswith('/products/') and len(path) > 10:
+                slug = path.split('/products/')[-1].strip('/')
+                product = Product.objects.filter(slug=slug).first()
+                if product:
+                    title = f"{product.name} ({product.quality_grade.name}) | Healthy Grains, Happy Families"
+                    desc = product.short_description or f"Purchase high-quality {product.name} online at the best prices."
+                    return Response({
+                        "path": path,
+                        "meta_title": title,
+                        "meta_description": desc,
+                        "meta_keywords": f"{product.name}, {product.sku}, pulses, grains",
+                        "og_title": title,
+                        "og_description": desc,
+                        "og_image": product.image.url if product.image else "",
+                        "canonical_url": request.build_absolute_uri(path)
+                    })
+            elif path.startswith('/categories/') and len(path) > 12:
+                slug = path.split('/categories/')[-1].strip('/')
+                cat = Category.objects.filter(slug=slug).first()
+                if cat:
+                    title = f"Premium {cat.name} Grains Collection | Healthy Grains, Happy Families"
+                    desc = cat.description or f"Explore our premium selection of {cat.name} grains."
+                    return Response({
+                        "path": path,
+                        "meta_title": title,
+                        "meta_description": desc,
+                        "meta_keywords": f"{cat.name}, grains, wholesale pulses",
+                        "og_title": title,
+                        "og_description": desc,
+                        "og_image": cat.image.url if cat.image else "",
+                        "canonical_url": request.build_absolute_uri(path)
+                    })
+
+            default_title = "Healthy Grains, Happy Families | High-Quality Pulses & Grains"
+            default_desc = "Get high-quality Sortex pulses, wheat, and grains delivered to your home or retail store. Order online today!"
+            return Response({
+                "path": path,
+                "meta_title": default_title,
+                "meta_description": default_desc,
+                "meta_keywords": "pulses, wheat, sortex, dealer onboarding, grain dealer",
+                "og_title": default_title,
+                "og_description": default_desc,
+                "og_image": "",
+                "canonical_url": request.build_absolute_uri(path)
+            })

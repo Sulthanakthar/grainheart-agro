@@ -7,7 +7,8 @@ from .views import (
     ProductDetailView,
     ReviewListCreateView,
     WishlistListCreateView,
-    WishlistDestroyView
+    WishlistDestroyView,
+    SEOMetadataView
 )
 
 urlpatterns = [
@@ -19,4 +20,5 @@ urlpatterns = [
     path('products/<slug:slug>/reviews/', ReviewListCreateView.as_view(), name='product_reviews'),
     path('wishlist/', WishlistListCreateView.as_view(), name='wishlist_list_create'),
     path('wishlist/<slug:product_slug>/', WishlistDestroyView.as_view(), name='wishlist_destroy'),
+    path('seo/metadata/', SEOMetadataView.as_view(), name='seo_metadata'),
 ]

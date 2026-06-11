@@ -80,6 +80,16 @@ class LeadDetailView(generics.RetrieveUpdateAPIView):
             return LeadUpdateSerializer
         return LeadSerializer
 
+    def perform_update(self, serializer):
+        lead = serializer.save()
+        from accounts.models import log_action
+        log_action(
+            self.request.user,
+            "update_lead",
+            self.request,
+            f"Lead: {lead.lead_number}, Status: {lead.lead_status}, Priority: {lead.priority}, Revenue: {lead.expected_revenue}"
+        )
+
 class FollowupListCreateView(generics.ListCreateAPIView):
     queryset = Followup.objects.all().select_related('lead', 'assigned_to').order_by('followup_date')
     serializer_class = FollowupSerializer

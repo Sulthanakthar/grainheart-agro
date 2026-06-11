@@ -14,7 +14,7 @@ from rest_framework import status, permissions, generics
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 
-from .models import OTPVerification, Customer, Dealer
+from .models import OTPVerification, Customer, Dealer, log_action
 from .serializers import (
     RegisterSerializer,
     DealerRegisterSerializer,
@@ -117,6 +117,9 @@ class LoginView(APIView):
             logger.warning(msg)
             print(msg)
 
+            # Log action
+            log_action(user, "request_otp_login", request, f"OTP Session ID: {otp_ver.session_id}")
+
             return Response({
                 "session_id": str(otp_ver.session_id),
                 "message": "OTP has been generated and sent to your registered contact channel."
@@ -151,6 +154,9 @@ class OTPVerifyView(APIView):
                     profile_data = DealerProfileSerializer(user.dealer_profile).data
                 except Dealer.DoesNotExist:
                     pass
+
+            # Log action
+            log_action(user, "login_success", request, f"User {user.username} logged in successfully with role {user.role}")
 
             return Response({
                 "refresh": str(refresh),
@@ -357,6 +363,9 @@ class DealerApprovalView(APIView):
                 dealer.commission_rate = rate
             dealer.save()
 
+            # Log action
+            log_action(request.user, "dealer_approval", request, f"Dealer: {dealer.business_name}, Status: {new_status}, Rate: {rate}")
+
         return Response(DealerAdminSerializer(dealer).data, status=status.HTTP_200_OK)
 
 class DealerDocumentUploadView(APIView):
@@ -440,6 +449,9 @@ class CommissionPayoutView(APIView):
         commission.payout_status = 'paid'
         commission.payout_date = timezone.now()
         commission.save()
+
+        # Log action
+        log_action(request.user, "commission_payout", request, f"Commission ID: {commission.id}, Amount: {commission.commission_amount}, Dealer: {commission.dealer.business_name}")
 
         return Response(CommissionSerializer(commission).data, status=status.HTTP_200_OK)
 

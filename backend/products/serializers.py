@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Category, QualityGrade, Product, ProductImage, Wishlist, Review
+from .models import Category, QualityGrade, Product, ProductImage, Wishlist, Review, SEOMetadata
 
 User = get_user_model()
 
@@ -103,3 +103,9 @@ class WishlistSerializer(serializers.ModelSerializer):
 
         attrs['customer'] = customer
         return attrs
+
+class SEOMetadataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SEOMetadata
+        fields = ('id', 'path', 'meta_title', 'meta_description', 'meta_keywords', 'og_title', 'og_description', 'og_image', 'canonical_url', 'created_at', 'updated_at')
+        read_only_fields = ('id', 'created_at', 'updated_at')

@@ -266,3 +266,51 @@ def create_dealer_commission_on_delivery(sender, instance, created, **kwargs):
                 perf.save()
 
 
+class AuditLog(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="audit_logs"
+    )
+    action = models.CharField(max_length=255)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.TextField(blank=True)
+    details = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        user_str = self.user.username if self.user else "Anonymous"
+        return f"{self.created_at} - {user_str}: {self.action}"
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['action']),
+            models.Index(fields=['created_at']),
+        ]
+
+def log_action(user, action, request=None, details=""):
+    ip_address = None
+    user_agent = ""
+    if request:
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip_address = x_forwarded_for.split(',')[0].strip()
+        else:
+            ip_address = request.META.get('REMOTE_ADDR')
+        user_agent = request.META.get('HTTP_USER_AGENT', '')
+
+    auth_user = None
+    if user and user.is_authenticated:
+        auth_user = user
+
+    return AuditLog.objects.create(
+        user=auth_user,
+        action=action,
+        ip_address=ip_address,
+        user_agent=user_agent,
+        details=details
+    )
+
+
