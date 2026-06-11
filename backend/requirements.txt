@@ -12,5 +12,4 @@ PyMySQL>=1.1.0
 gunicorn>=21.2.0
 Pillow>=10.0.0
 djangorestframework-simplejwt>=5.3.1
-
-
+openpyxl>=3.1.2
