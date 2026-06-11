@@ -132,3 +132,46 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"Notification: {self.title} for {self.user.username}"
+
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+import uuid
+import datetime
+
+@receiver(post_save, sender=Enquiry)
+def create_crm_lead_from_enquiry(sender, instance, created, **kwargs):
+    if created:
+        priority = 'medium'
+        if instance.enquiry_type in ['wholesale', 'bulk_purchase', 'dealer']:
+            priority = 'high'
+            
+        date_str = datetime.date.today().strftime("%Y%m%d")
+        lead_number = f"LEAD-{date_str}-{uuid.uuid4().hex[:6].upper()}"
+        
+        Lead.objects.create(
+            lead_number=lead_number,
+            enquiry=instance,
+            priority=priority,
+            lead_status='new_lead'
+        )
+
+@receiver(post_save, sender=Lead)
+def notify_sales_exec_on_assignment(sender, instance, created, **kwargs):
+    if instance.assigned_to:
+        title = "New Lead Assigned"
+        message = f"You have been assigned to Lead {instance.lead_number}."
+        
+        # Prevent duplicate alerts
+        if not Notification.objects.filter(
+            user=instance.assigned_to,
+            notification_type='lead_assigned',
+            message__contains=instance.lead_number
+        ).exists():
+            Notification.objects.create(
+                user=instance.assigned_to,
+                title=title,
+                message=message,
+                notification_type='lead_assigned'
+            )
+
