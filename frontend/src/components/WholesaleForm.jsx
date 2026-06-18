@@ -17,6 +17,7 @@ const PRODUCTS = [
 
 const initialFormState = {
   fullName: '',
+  email: '',
   mobile: '',
   businessName: '',
   product: '',
@@ -35,6 +36,12 @@ const WholesaleForm = () => {
       newErrors.fullName = 'Full name is required.';
     } else if (form.fullName.trim().length < 2) {
       newErrors.fullName = 'Name must be at least 2 characters.';
+    }
+
+    if (!form.email.trim()) {
+      newErrors.email = 'Email address is required.';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      newErrors.email = 'Enter a valid email address.';
     }
 
     if (!form.mobile.trim()) {
@@ -80,12 +87,34 @@ const WholesaleForm = () => {
     setSubmitState('loading');
     setErrors({});
 
-    // Simulate form submission (replace with actual API call if backend available)
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const apiBaseUrl = import.meta.env.VITE_API_URL || '';
+      const response = await fetch(`${apiBaseUrl}/api/v1/enquiries/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          customer_name: form.fullName,
+          email: form.email,
+          phone: form.mobile,
+          enquiry_type: 'wholesale',
+          subject: `Wholesale Enquiry: ${form.product}`,
+          message: form.businessName
+            ? `Business: ${form.businessName}\nProduct: ${form.product}\nRequirements: ${form.message}`
+            : `Product: ${form.product}\nRequirements: ${form.message}`,
+          source: 'web',
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit enquiry');
+      }
+
       setSubmitState('success');
       setForm(initialFormState);
-    } catch {
+    } catch (error) {
+      console.error('Error submitting enquiry:', error);
       setSubmitState('error');
     }
   };
@@ -256,6 +285,32 @@ const WholesaleForm = () => {
                         )}
                       </div>
 
+                      {/* Email Address */}
+                      <div className="space-y-2">
+                        <label htmlFor="form-email" className="text-sm font-semibold text-gray-700 ml-1">
+                          Email Address <span className="text-red-500" aria-hidden="true">*</span>
+                        </label>
+                        <input 
+                          id="form-email"
+                          type="email" 
+                          name="email"
+                          value={form.email}
+                          onChange={handleChange}
+                          placeholder="your@email.com"
+                          className={inputClass('email')}
+                          aria-required="true"
+                          aria-describedby={errors.email ? 'err-email' : undefined}
+                          autoComplete="email"
+                        />
+                        {errors.email && (
+                          <p id="err-email" className="text-red-500 text-xs ml-1 flex items-center gap-1" role="alert">
+                            <AlertCircle className="w-3 h-3" aria-hidden="true" /> {errors.email}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-6">
                       {/* Mobile Number */}
                       <div className="space-y-2">
                         <label htmlFor="form-mobile" className="text-sm font-semibold text-gray-700 ml-1">
@@ -280,9 +335,7 @@ const WholesaleForm = () => {
                           </p>
                         )}
                       </div>
-                    </div>
 
-                    <div className="grid md:grid-cols-2 gap-6">
                       {/* Business Name */}
                       <div className="space-y-2">
                         <label htmlFor="form-businessName" className="text-sm font-semibold text-gray-700 ml-1">
@@ -299,40 +352,40 @@ const WholesaleForm = () => {
                           autoComplete="organization"
                         />
                       </div>
+                    </div>
 
-                      {/* Product Selection */}
-                      <div className="space-y-2">
-                        <label htmlFor="form-product" className="text-sm font-semibold text-gray-700 ml-1">
-                          Product Selection <span className="text-red-500" aria-hidden="true">*</span>
-                        </label>
-                        <div className="relative">
-                          <select 
-                            id="form-product"
-                            name="product"
-                            value={form.product}
-                            onChange={handleChange}
-                            className={`${inputClass('product')} appearance-none pr-10`}
-                            aria-required="true"
-                            aria-describedby={errors.product ? 'err-product' : undefined}
-                          >
-                            {PRODUCTS.map((p) => (
-                              <option key={p} value={p === 'Select Product' ? '' : p} disabled={p === 'Select Product'}>
-                                {p}
-                              </option>
-                            ))}
-                          </select>
-                          <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden="true">
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                            </svg>
-                          </div>
+                    {/* Product Selection */}
+                    <div className="space-y-2">
+                      <label htmlFor="form-product" className="text-sm font-semibold text-gray-700 ml-1">
+                        Product Selection <span className="text-red-500" aria-hidden="true">*</span>
+                      </label>
+                      <div className="relative">
+                        <select 
+                          id="form-product"
+                          name="product"
+                          value={form.product}
+                          onChange={handleChange}
+                          className={`${inputClass('product')} appearance-none pr-10`}
+                          aria-required="true"
+                          aria-describedby={errors.product ? 'err-product' : undefined}
+                        >
+                          {PRODUCTS.map((p) => (
+                            <option key={p} value={p === 'Select Product' ? '' : p} disabled={p === 'Select Product'}>
+                              {p}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden="true">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
                         </div>
-                        {errors.product && (
-                          <p id="err-product" className="text-red-500 text-xs ml-1 flex items-center gap-1" role="alert">
-                            <AlertCircle className="w-3 h-3" aria-hidden="true" /> {errors.product}
-                          </p>
-                        )}
                       </div>
+                      {errors.product && (
+                        <p id="err-product" className="text-red-500 text-xs ml-1 flex items-center gap-1" role="alert">
+                          <AlertCircle className="w-3 h-3" aria-hidden="true" /> {errors.product}
+                        </p>
+                      )}
                     </div>
 
                     {/* Message */}
