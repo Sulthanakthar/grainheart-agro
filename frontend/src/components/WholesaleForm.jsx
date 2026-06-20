@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Phone, Mail, MapPin, MessageCircle, CheckCircle, AlertCircle, Loader } from 'lucide-react';
 
-const WHATSAPP_NUMBER = '919876543210';
+const WHATSAPP_NUMBER = '919944550063';
 
 const PRODUCTS = [
   'Select Product',
@@ -173,8 +173,8 @@ const WholesaleForm = () => {
                     </div>
                     <div>
                       <p className="text-white/60 text-xs uppercase tracking-widest font-semibold mb-1">Call Us</p>
-                      <a href="tel:+919876543210" id="contact-phone-link" className="text-xl font-bold hover:text-grain-gold transition-colors">
-                        +91 98765 43210
+                      <a href="tel:+919944550063" id="contact-phone-link" className="text-xl font-bold hover:text-grain-gold transition-colors">
+                        +91 99445 50063
                       </a>
                     </div>
                   </div>
@@ -185,8 +185,8 @@ const WholesaleForm = () => {
                     </div>
                     <div>
                       <p className="text-white/60 text-xs uppercase tracking-widest font-semibold mb-1">Email</p>
-                      <a href="mailto:sales@healthygrains.com" id="contact-email-link" className="text-lg font-bold hover:text-grain-gold transition-colors break-all">
-                        sales@healthygrains.com
+                      <a href="mailto:mohammedsulthan2004@gmail.com" id="contact-email-link" className="text-lg font-bold hover:text-grain-gold transition-colors break-all">
+                        mohammedsulthan2004@gmail.com
                       </a>
                     </div>
                   </div>
@@ -214,7 +214,7 @@ const WholesaleForm = () => {
                     S
                   </div>
                   <div>
-                    <p className="font-bold text-sm">Sulthan Ahmed</p>
+                    <p className="font-bold text-sm">Mohammed Sulthan</p>
                     <p className="text-[10px] text-white/60 uppercase tracking-wider">Managing Director</p>
                   </div>
                 </div>

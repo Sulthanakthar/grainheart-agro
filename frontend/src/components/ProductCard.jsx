@@ -6,7 +6,7 @@ const ProductCard = ({ product }) => {
   const [imgError, setImgError] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
 
-  const fallbackImage = '/images/toor-dal.png';
+  const fallbackImage = 'images/toor-dal.png';
 
   return (
     <motion.div 

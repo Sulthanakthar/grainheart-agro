@@ -175,23 +175,23 @@ const Footer = () => {
               <div className="flex gap-4">
                 <Phone className="w-5 h-5 text-grain-gold shrink-0" aria-hidden="true" />
                 <div>
-                  <a href="tel:+919876543210" id="footer-phone-link" className="text-white font-bold hover:text-grain-gold transition-colors">
-                    +91 98765 43210
+                  <a href="tel:+919944550063" id="footer-phone-link" className="text-white font-bold hover:text-grain-gold transition-colors">
+                    +91 99445 50063
                   </a>
                   <p className="text-gray-500 text-[11px] mt-0.5">Mon - Sat: 9AM - 8PM</p>
                 </div>
               </div>
               <div className="flex gap-4">
                 <Mail className="w-5 h-5 text-grain-gold shrink-0" aria-hidden="true" />
-                <a href="mailto:sales@healthygrains.com" id="footer-email-link" className="text-gray-400 text-sm hover:text-white transition-colors">
-                  sales@healthygrains.com
+                <a href="mailto:mohammedsulthan2004@gmail.com" id="footer-email-link" className="text-gray-400 text-sm hover:text-white transition-colors">
+                  mohammedsulthan2004@gmail.com
                 </a>
               </div>
 
               {/* WhatsApp CTA */}
               <a
                 id="footer-whatsapp-cta"
-                href="https://wa.me/919876543210?text=Hello%2C%20I%20want%20to%20place%20a%20wholesale%20order."
+                href="https://wa.me/919944550063?text=Hello%2C%20I%20want%20to%20place%20a%20wholesale%20order."
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-3 px-5 py-3 rounded-xl bg-[#25D366] text-white font-bold text-sm hover:bg-[#20BA5A] transition-all shadow-lg hover:shadow-xl active:scale-95"

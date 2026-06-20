@@ -122,7 +122,8 @@ class LoginView(APIView):
 
             return Response({
                 "session_id": str(otp_ver.session_id),
-                "message": "OTP has been generated and sent to your registered contact channel."
+                "message": "OTP has been generated and sent to your registered contact channel.",
+                "otp_code": otp_code
             }, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -209,7 +210,8 @@ class PasswordResetRequestView(APIView):
 
             return Response({
                 "session_id": str(otp_ver.session_id),
-                "message": "Password reset OTP sent to your email address."
+                "message": "Password reset OTP sent to your email address.",
+                "otp_code": otp_code
             }, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

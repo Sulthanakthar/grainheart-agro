@@ -13,7 +13,7 @@ const products = [
     quality: 'High Sortex',
     isSortex: true,
     discount: 10,
-    image: '/images/toor-dal.png'
+    image: 'images/toor-dal.png'
   },
   {
     id: 2,
@@ -24,7 +24,7 @@ const products = [
     category: 'Pulses',
     quality: 'Sortex',
     isSortex: true,
-    image: '/images/chana-dal.png'
+    image: 'images/chana-dal.png'
   },
   {
     id: 3,
@@ -35,7 +35,7 @@ const products = [
     category: 'Pulses',
     quality: 'Fine Quality',
     isSortex: false,
-    image: '/images/moong-dal.png'
+    image: 'images/moong-dal.png'
   },
   {
     id: 4,
@@ -47,7 +47,7 @@ const products = [
     quality: 'High Sortex',
     isSortex: true,
     discount: 5,
-    image: '/images/urad-dal.png'
+    image: 'images/urad-dal.png'
   },
   {
     id: 5,
@@ -57,7 +57,7 @@ const products = [
     category: 'Wheat',
     quality: 'High Sortex',
     isSortex: true,
-    image: '/images/sharbati-wheat.png'
+    image: 'images/sharbati-wheat.png'
   },
   {
     id: 6,
@@ -67,7 +67,7 @@ const products = [
     category: 'Wheat',
     quality: 'Sortex',
     isSortex: true,
-    image: '/images/lokwan-wheat.png'
+    image: 'images/lokwan-wheat.png'
   }
 ];
 

@@ -4,7 +4,7 @@ import { ArrowRight, MessageCircle } from 'lucide-react';
 import heroBg from '../assets/hero-bg.png';
 import productsHero from '../assets/products-hero.png';
 
-const WHATSAPP_NUMBER = '919876543210';
+const WHATSAPP_NUMBER = '919944550063';
 
 const Hero = () => {
   const handleScrollToSection = useCallback((href) => {
