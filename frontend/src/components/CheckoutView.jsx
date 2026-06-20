@@ -95,7 +95,7 @@ const CheckoutView = ({ cart, user, profile, apiBaseUrl, onOrderPlaced, onBackTo
             </div>
             <h2 className="text-3xl font-extrabold text-gray-900">Order Placed Successfully!</h2>
             <p className="text-gray-500 max-w-md mx-auto leading-relaxed text-sm font-medium">
-              Thank you for purchasing from Healthy Grains. Your order reference is <strong className="text-grain-green">{placedOrder.order_number}</strong>. An invoice has been generated.
+              Thank you for purchasing from Gafoor Company. Your order reference is <strong className="text-grain-green">{placedOrder.order_number}</strong>. An invoice has been generated.
             </p>
 
             <div className="bg-gray-50 p-6 rounded-3xl border border-gray-100 text-left space-y-3 max-w-md mx-auto text-sm font-semibold">

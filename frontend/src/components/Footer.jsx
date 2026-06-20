@@ -24,7 +24,7 @@ const Footer = () => {
 
   const socialLinks = [
     { Icon: Facebook, label: 'Facebook', href: 'https://facebook.com', id: 'footer-facebook-link' },
-    { Icon: Instagram, label: 'Instagram', href: 'https://instagram.com', id: 'footer-instagram-link' },
+    { Icon: Instagram, label: 'Instagram', href: 'https://www.instagram.com/gafoor_company?igshid=NzZlODBkYWE4Ng==', id: 'footer-instagram-link' },
     { Icon: Twitter, label: 'Twitter', href: 'https://twitter.com', id: 'footer-twitter-link' },
     { Icon: Youtube, label: 'YouTube', href: 'https://youtube.com', id: 'footer-youtube-link' },
   ];
@@ -60,18 +60,18 @@ const Footer = () => {
         <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-16 mb-20">
           {/* Brand Column */}
           <div className="lg:col-span-1">
-            <a href="#" id="footer-logo-link" className="flex items-center gap-3 mb-8 group" aria-label="Healthy Grains home">
+            <a href="#" id="footer-logo-link" className="flex items-center gap-3 mb-8 group" aria-label="Gafoor Company home">
               <div className="w-12 h-12 bg-grain-green rounded-xl flex items-center justify-center shadow-lg transform -rotate-6 group-hover:rotate-0 transition-transform duration-300">
-                <span className="text-white font-bold text-2xl">HG</span>
+                <span className="text-white font-bold text-2xl">GC</span>
               </div>
               <div>
-                <h2 className="text-2xl font-bold">Healthy Grains</h2>
-                <p className="text-[10px] uppercase tracking-[0.2em] text-grain-gold font-bold">Happy Families</p>
+                <h2 className="text-2xl font-bold">Gafoor Company</h2>
+                <p className="text-[8px] uppercase tracking-[0.2em] text-grain-gold font-bold">Wholesale Prices for Everyone</p>
               </div>
             </a>
             <p className="text-gray-400 mb-8 leading-relaxed text-sm">
               Your trusted partner for premium sortex-quality pulses and wheat. 
-              Delivering health and freshness to your family since 2008.
+              Delivering health and freshness to your family since 1990.
             </p>
 
             {/* Social Links */}
@@ -208,9 +208,9 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
           <p className="text-gray-500 text-sm text-center">
-            &copy; {currentYear} Healthy Grains Dealer Shop. All rights reserved. 
+            &copy; {currentYear} Gafoor Company. All rights reserved. 
             <span className="mx-2">|</span>
-            Built for Happy Families.
+            Wholesale Prices for Everyone.
           </p>
           <div className="flex gap-8 text-xs text-gray-500 font-bold uppercase tracking-widest">
             <a id="footer-privacy-link" href="#" className="hover:text-white transition-colors">Privacy Policy</a>

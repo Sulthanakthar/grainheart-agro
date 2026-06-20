@@ -4,7 +4,7 @@ import { Check, Star, Users, Truck, Clock } from 'lucide-react';
 
 const About = () => {
   const features = [
-    { title: 'Trusted Dealer', desc: '15+ years of excellence', icon: <Users className="w-6 h-6" /> },
+    { title: 'Trusted Dealer', desc: '35+ years of excellence', icon: <Users className="w-6 h-6" /> },
     { title: 'Fresh Quality', desc: 'Direct from the fields', icon: <Star className="w-6 h-6" /> },
     { title: 'Reliable Supply', desc: 'Always in stock', icon: <Truck className="w-6 h-6" /> },
     { title: 'Fast Delivery', desc: 'Next day dispatch', icon: <Clock className="w-6 h-6" /> },
@@ -33,7 +33,7 @@ const About = () => {
               whileInView={{ x: 0, opacity: 1 }}
               className="absolute -bottom-6 -right-6 bg-grain-gold p-8 rounded-3xl text-white shadow-2xl z-20"
             >
-              <p className="text-4xl font-bold mb-1">15+</p>
+              <p className="text-4xl font-bold mb-1">35+</p>
               <p className="text-sm font-semibold uppercase tracking-widest">Years of Trust</p>
             </motion.div>
           </div>
@@ -45,7 +45,7 @@ const About = () => {
               <span className="text-grain-green">Grain Dealer in Tirupattur</span>
             </h2>
             <p className="text-lg text-gray-600 mb-10 leading-relaxed">
-              At Healthy Grains, we believe that every family deserves the best quality nutrition. 
+              At Gafoor Company, we believe that every family deserves the best quality nutrition. 
               We specialize in premium sortex-cleaned pulses and wheat, sourced directly from the 
               finest farms. Our state-of-the-art cleaning technology and commitment to freshness 
               ensure you get nothing but the best.

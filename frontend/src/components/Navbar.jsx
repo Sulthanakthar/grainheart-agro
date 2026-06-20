@@ -95,17 +95,17 @@ const Navbar = ({ user, cartItemCount, currentView, onNavigate, onLogout }) => {
             id="navbar-logo"
             className="flex items-center gap-2 focus:outline-none"
             onClick={(e) => handleLinkClick(e, '#', 'landing')}
-            aria-label="Healthy Grains - Home"
+            aria-label="Gafoor Company - Home"
           >
             <div className="w-10 h-10 bg-grain-green rounded-lg flex items-center justify-center shadow-lg" aria-hidden="true">
-              <span className="text-white font-bold text-xl">HG</span>
+              <span className="text-white font-bold text-xl">GC</span>
             </div>
             <div>
               <h1 className="text-xl font-bold transition-colors text-grain-green">
-                Healthy Grains
+                Gafoor Company
               </h1>
-              <p className="text-[10px] uppercase tracking-widest text-grain-gold">
-                Happy Families
+              <p className="text-[8px] uppercase tracking-widest text-grain-gold font-bold">
+                Wholesale Prices for Everyone
               </p>
             </div>
           </a>

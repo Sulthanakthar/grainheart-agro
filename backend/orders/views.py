@@ -386,8 +386,8 @@ class InvoiceDownloadView(APIView):
             <div class="invoice-box">
                 <div class="header">
                     <div>
-                        <h1 style="color: #2e4d2e; margin: 0 0 10px 0; font-size: 28px;">HEALTHY GRAINS</h1>
-                        <p style="margin: 0; color: #666;">Happy Families Premium Pulses & Wheat</p>
+                        <h1 style="color: #2e4d2e; margin: 0 0 10px 0; font-size: 28px;">GAFOOR COMPANY</h1>
+                        <p style="margin: 0; color: #666;">Wholesale Prices for Everyone | Premium Pulses & Wheat</p>
                     </div>
                     <div class="company-details">
                         <h3 style="margin: 0;">INVOICE</h3>
@@ -445,7 +445,7 @@ class InvoiceDownloadView(APIView):
                 </div>
 
                 <div style="margin-top: 50px; text-align: center; font-size: 12px; color: #999; border-top: 1px solid #eee; padding-top: 20px;">
-                    Thank you for buying from Healthy Grains! This is a system-generated invoice.
+                    Thank you for buying from Gafoor Company! This is a system-generated invoice.
                 </div>
                 
                 <a href="#" class="print-btn" onclick="window.print(); return false;">Print Invoice</a>

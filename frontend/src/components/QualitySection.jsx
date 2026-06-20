@@ -99,7 +99,7 @@ const QualitySection = () => {
                 <h4 className="text-xl font-bold">Trusted by Retailers</h4>
               </div>
               <p className="text-white/80 text-sm leading-relaxed">
-                "Healthy Grains provides the most consistent sortex quality in the market. 
+                "Gafoor Company provides the most consistent sortex quality in the market. 
                 Our customers always ask for their brand."
               </p>
               <div className="mt-4 flex items-center gap-2">

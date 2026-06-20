@@ -122,7 +122,7 @@ const WholesaleForm = () => {
   const handleWhatsApp = () => {
     const { fullName, mobile, product, message } = form;
     const text = [
-      '🌾 *Wholesale Enquiry - Healthy Grains*',
+      '🌾 *Wholesale Enquiry - Gafoor Company*',
       '',
       `👤 Name: ${fullName || 'N/A'}`,
       `📱 Mobile: ${mobile || 'N/A'}`,

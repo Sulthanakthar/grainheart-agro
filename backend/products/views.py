@@ -206,7 +206,7 @@ class SEOMetadataView(APIView):
                 slug = path.split('/products/')[-1].strip('/')
                 product = Product.objects.filter(slug=slug).first()
                 if product:
-                    title = f"{product.name} ({product.quality_grade.name}) | Healthy Grains, Happy Families"
+                    title = f"{product.name} ({product.quality_grade.name}) | Gafoor Company"
                     desc = product.short_description or f"Purchase high-quality {product.name} online at the best prices."
                     return Response({
                         "path": path,
@@ -222,7 +222,7 @@ class SEOMetadataView(APIView):
                 slug = path.split('/categories/')[-1].strip('/')
                 cat = Category.objects.filter(slug=slug).first()
                 if cat:
-                    title = f"Premium {cat.name} Grains Collection | Healthy Grains, Happy Families"
+                    title = f"Premium {cat.name} Grains Collection | Gafoor Company"
                     desc = cat.description or f"Explore our premium selection of {cat.name} grains."
                     return Response({
                         "path": path,
@@ -235,13 +235,13 @@ class SEOMetadataView(APIView):
                         "canonical_url": request.build_absolute_uri(path)
                     })
 
-            default_title = "Healthy Grains, Happy Families | High-Quality Pulses & Grains"
-            default_desc = "Get high-quality Sortex pulses, wheat, and grains delivered to your home or retail store. Order online today!"
+            default_title = "Gafoor Company | High-Quality Pulses & Grains Wholesale in Tirupattur"
+            default_desc = "Get high-quality Sortex pulses, wheat, and grains from Gafoor Company (established 1990) in Tirupattur. Order online at wholesale prices."
             return Response({
                 "path": path,
                 "meta_title": default_title,
                 "meta_description": default_desc,
-                "meta_keywords": "pulses, wheat, sortex, dealer onboarding, grain dealer",
+                "meta_keywords": "Gafoor Company, Gafoor and Co, Tirupattur, pulses, wheat, sortex, dealer onboarding, grain dealer",
                 "og_title": default_title,
                 "og_description": default_desc,
                 "og_image": "",

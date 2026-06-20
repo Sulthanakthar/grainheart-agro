@@ -559,7 +559,7 @@ class Phase9SecurityAndSEOTests(TestCase):
         # 1. Fetch dynamic default product SEO metadata
         response = self.client.get(f"{self.seo_url}?path=/products/premium-rice-grains")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['meta_title'], "Premium Rice Grains (Sortex Premium) | Healthy Grains, Happy Families")
+        self.assertEqual(response.data['meta_title'], "Premium Rice Grains (Sortex Premium) | Gafoor Company")
         
         # 2. Fetch specific database-defined SEO metadata
         SEOMetadata.objects.create(

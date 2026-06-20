@@ -171,5 +171,5 @@ class CartAndOrderAPITests(APITestCase):
         invoice_url = reverse('invoice_download', kwargs={'order_number': order_number})
         response = self.client.get(invoice_url)
         self.assertEqual(response.status_code, 200)
-        self.assertIn(b"HEALTHY GRAINS", response.content)
+        self.assertIn(b"GAFOOR COMPANY", response.content)
         self.assertIn(b"INVOICE", response.content)

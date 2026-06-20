@@ -41,12 +41,12 @@ const Hero = () => {
             </div>
             
             <h1 className="text-5xl md:text-7xl font-extrabold text-gray-900 leading-tight mb-6">
-              Healthy Grains, <br />
-              <span className="text-grain-green italic">Happy Families</span>
+              Gafoor Company, <br />
+              <span className="text-grain-green italic text-4xl md:text-5xl block mt-2">Wholesale Prices for Everyone</span>
             </h1>
             
             <p className="text-xl text-gray-600 mb-10 max-w-lg leading-relaxed">
-              Experience the purity of premium Sortex-quality pulses and wheat. 
+              Experience the purity of premium Sortex-quality pulses, wheat, and grains. 
               Farm-fresh goodness delivered from our trusted wholesale dealer shop 
               at budget-friendly prices.
             </p>
@@ -81,7 +81,7 @@ const Hero = () => {
 
             <div className="mt-12 flex items-center gap-8">
               <div className="flex flex-col">
-                <span className="text-3xl font-bold text-grain-green">15+</span>
+                <span className="text-3xl font-bold text-grain-green">35+</span>
                 <span className="text-sm text-gray-500 uppercase tracking-wider">Years Trust</span>
               </div>
               <div className="w-px h-10 bg-gray-200"></div>
