@@ -169,7 +169,7 @@ const Footer = () => {
               <div className="flex gap-4">
                 <MapPin className="w-5 h-5 text-grain-gold shrink-0 mt-0.5" aria-hidden="true" />
                 <p className="text-gray-400 text-sm leading-relaxed">
-                  Plot 45, Grain Market Road, Pune, Maharashtra - 411001
+                  14, Big Bazaar Street, Tirupattur, Tamil Nadu
                 </p>
               </div>
               <div className="flex gap-4">

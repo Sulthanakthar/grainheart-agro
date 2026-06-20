@@ -68,8 +68,8 @@ class Command(BaseCommand):
                 user=cust_user,
                 phone='9898989898',
                 address='123 Green Street, Camp',
-                city='Pune',
-                state='Maharashtra',
+                city='Tirupattur',
+                state='Tamil Nadu',
                 country='India'
             )
             self.stdout.write(self.style.SUCCESS('Customer user created (customer_user / customer123)'))
@@ -88,20 +88,20 @@ class Command(BaseCommand):
         # 2. Create Territories
         self.stdout.write('Creating territories...')
         t_north, _ = Territory.objects.get_or_create(
-            territory_name='Pune North',
-            defaults={'district': 'Pune', 'state': 'Maharashtra', 'manager_name': 'Sales Mgr North'}
+            territory_name='Tirupattur North',
+            defaults={'district': 'Tirupattur', 'state': 'Tamil Nadu', 'manager_name': 'Sales Mgr North'}
         )
         t_south, _ = Territory.objects.get_or_create(
-            territory_name='Pune South',
-            defaults={'district': 'Pune', 'state': 'Maharashtra', 'manager_name': 'Sales Mgr South'}
+            territory_name='Tirupattur South',
+            defaults={'district': 'Tirupattur', 'state': 'Tamil Nadu', 'manager_name': 'Sales Mgr South'}
         )
         t_east, _ = Territory.objects.get_or_create(
-            territory_name='Pune East',
-            defaults={'district': 'Pune', 'state': 'Maharashtra', 'manager_name': 'Sales Mgr East'}
+            territory_name='Tirupattur East',
+            defaults={'district': 'Tirupattur', 'state': 'Tamil Nadu', 'manager_name': 'Sales Mgr East'}
         )
         t_west, _ = Territory.objects.get_or_create(
-            territory_name='Pune West',
-            defaults={'district': 'Pune', 'state': 'Maharashtra', 'manager_name': 'Sales Mgr West'}
+            territory_name='Tirupattur West',
+            defaults={'district': 'Tirupattur', 'state': 'Tamil Nadu', 'manager_name': 'Sales Mgr West'}
         )
         self.stdout.write(self.style.SUCCESS('Territories seeded.'))
 
@@ -111,7 +111,7 @@ class Command(BaseCommand):
             dealer_user.save()
             Dealer.objects.create(
                 user=dealer_user,
-                dealer_code='DL-PUNE-001',
+                dealer_code='DL-TIRU-001',
                 business_name='Mohan Grain Distributors',
                 owner_name='Mohan Lal',
                 phone='9988776655',

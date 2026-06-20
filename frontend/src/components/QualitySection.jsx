@@ -106,7 +106,7 @@ const QualitySection = () => {
                 <div className="w-8 h-8 rounded-full bg-white/20"></div>
                 <div>
                   <p className="text-xs font-bold">Rajesh Kumar</p>
-                  <p className="text-[10px] text-white/60">Retailer, Pune</p>
+                  <p className="text-[10px] text-white/60">Retailer, Tirupattur</p>
                 </div>
               </div>
             </div>

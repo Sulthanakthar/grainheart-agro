@@ -42,7 +42,7 @@ const About = () => {
             <span className="text-grain-gold font-bold uppercase tracking-widest text-sm">About Our Business</span>
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mt-4 mb-8 leading-tight">
               Leading Wholesale & Retail <br />
-              <span className="text-grain-green">Grain Dealer in Pune</span>
+              <span className="text-grain-green">Grain Dealer in Tirupattur</span>
             </h2>
             <p className="text-lg text-gray-600 mb-10 leading-relaxed">
               At Healthy Grains, we believe that every family deserves the best quality nutrition. 

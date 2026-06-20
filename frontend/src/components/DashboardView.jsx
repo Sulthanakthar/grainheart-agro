@@ -788,7 +788,7 @@ const DashboardView = ({ user, profile, apiBaseUrl, onLogout, onProductChanged }
 
                       <div className="p-6 bg-gray-50 rounded-2xl border border-gray-100 space-y-3">
                         <p className="text-xs text-gray-400 font-bold">ASSIGNED TERRITORY</p>
-                        <p className="font-extrabold text-lg text-grain-green">{profile?.territory_name || 'Pune Region'}</p>
+                        <p className="font-extrabold text-lg text-grain-green">{profile?.territory_name || 'Tirupattur Region'}</p>
                         <p className="text-xs text-gray-400 font-bold mt-4">STATUS</p>
                         <span className="inline-flex text-xs font-bold text-green-700 bg-green-50 px-2.5 py-1 rounded-full border border-green-200">
                           {profile?.status?.toUpperCase()}
@@ -1065,7 +1065,7 @@ const DashboardView = ({ user, profile, apiBaseUrl, onLogout, onProductChanged }
                                 }`}>
                                   {dl.status.toUpperCase().replace('_', ' ')}
                                 </span>
-                                <span className="text-xs text-gray-400 font-semibold">Territory: {dl.territory_details?.territory_name || 'Pune Region'}</span>
+                                <span className="text-xs text-gray-400 font-semibold">Territory: {dl.territory_details?.territory_name || 'Tirupattur Region'}</span>
                                 <span className="text-xs text-grain-gold font-bold">Commission Rate: {dl.commission_rate}%</span>
                               </div>
                             </div>

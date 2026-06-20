@@ -198,7 +198,7 @@ const WholesaleForm = () => {
                     <div>
                       <p className="text-white/60 text-xs uppercase tracking-widest font-semibold mb-1">Visit Shop</p>
                       <p className="text-base font-semibold leading-tight">
-                        Plot 45, Grain Market Road, <br/>Pune, Maharashtra - 411001
+                        14, Big Bazaar Street, <br/>Tirupattur, Tamil Nadu
                       </p>
                     </div>
                   </div>

@@ -101,10 +101,10 @@ const Navbar = ({ user, cartItemCount, currentView, onNavigate, onLogout }) => {
               <span className="text-white font-bold text-xl">HG</span>
             </div>
             <div>
-              <h1 className={`text-xl font-bold transition-colors ${isScrolled || currentView !== 'landing' ? 'text-grain-green' : 'text-white'}`}>
+              <h1 className="text-xl font-bold transition-colors text-grain-green">
                 Healthy Grains
               </h1>
-              <p className={`text-[10px] uppercase tracking-widest ${isScrolled || currentView !== 'landing' ? 'text-grain-gold' : 'text-white/80'}`}>
+              <p className="text-[10px] uppercase tracking-widest text-grain-gold">
                 Happy Families
               </p>
             </div>
@@ -118,11 +118,7 @@ const Navbar = ({ user, cartItemCount, currentView, onNavigate, onLogout }) => {
                 href={link.href}
                 role="menuitem"
                 onClick={(e) => handleLinkClick(e, link.href, link.view)}
-                className={`font-bold text-sm transition-colors relative group focus:outline-none ${
-                  isScrolled || currentView !== 'landing'
-                    ? 'text-gray-700 hover:text-grain-green' 
-                    : 'text-white hover:text-grain-gold'
-                }`}
+                className="font-bold text-sm transition-colors relative group focus:outline-none text-gray-700 hover:text-grain-green"
               >
                 {link.name}
                 <span className={`absolute -bottom-1 left-0 w-0 h-0.5 bg-grain-green transition-all duration-300 group-hover:w-full`} aria-hidden="true"></span>
@@ -137,9 +133,7 @@ const Navbar = ({ user, cartItemCount, currentView, onNavigate, onLogout }) => {
             <button 
               id="navbar-cart-btn"
               onClick={() => onNavigate('cart')}
-              className={`p-2 rounded-full transition-colors relative ${
-                isScrolled || currentView !== 'landing' ? 'hover:bg-grain-green/10 text-gray-700' : 'hover:bg-white/15 text-white'
-              }`}
+              className="p-2 rounded-full transition-colors relative hover:bg-grain-green/10 text-gray-700"
               aria-label={`Shopping cart - ${cartItemCount} items`}
               title="Cart"
             >
@@ -156,11 +150,7 @@ const Navbar = ({ user, cartItemCount, currentView, onNavigate, onLogout }) => {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => onNavigate('dashboard')}
-                  className={`hidden md:flex items-center gap-1.5 px-4 py-2.5 rounded-full font-bold text-xs transition-all shadow-sm ${
-                    isScrolled || currentView !== 'landing'
-                      ? 'bg-grain-green text-white hover:bg-grain-green-dark'
-                      : 'bg-white text-grain-green hover:bg-grain-green-light'
-                  }`}
+                  className="hidden md:flex items-center gap-1.5 px-4 py-2.5 rounded-full font-bold text-xs transition-all shadow-sm bg-grain-green text-white hover:bg-grain-green-dark"
                 >
                   <User className="w-4 h-4" />
                   <span>Dashboard</span>
@@ -178,11 +168,7 @@ const Navbar = ({ user, cartItemCount, currentView, onNavigate, onLogout }) => {
               <button 
                 id="navbar-login-btn"
                 onClick={() => onNavigate('auth')}
-                className={`hidden md:flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-xs transition-all shadow-sm ${
-                  isScrolled || currentView !== 'landing'
-                    ? 'bg-grain-green text-white hover:bg-grain-green-dark'
-                    : 'bg-white text-grain-green hover:bg-grain-green-light'
-                }`}
+                className="hidden md:flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-xs transition-all shadow-sm bg-grain-green text-white hover:bg-grain-green-dark"
               >
                 <User className="w-4 h-4" />
                 <span>Sign In</span>
@@ -192,9 +178,7 @@ const Navbar = ({ user, cartItemCount, currentView, onNavigate, onLogout }) => {
             {/* Mobile Menu Toggle */}
             <button 
               id="navbar-mobile-toggle"
-              className={`lg:hidden p-2 rounded-full transition-colors ${
-                isScrolled || currentView !== 'landing' ? 'hover:bg-grain-green/10 text-gray-700' : 'hover:bg-white/15 text-white'
-              }`}
+              className="lg:hidden p-2 rounded-full transition-colors hover:bg-grain-green/10 text-gray-700"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
             >
