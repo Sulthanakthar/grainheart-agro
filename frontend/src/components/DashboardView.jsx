@@ -4,6 +4,7 @@ import {
   User, Clipboard, CreditCard, Award, FileText, CheckCircle, AlertCircle, 
   Trash2, Edit, Plus, Upload, Check, X, ShieldAlert, BarChart3, Users, Settings, LogOut, Loader 
 } from 'lucide-react';
+import { resolveImage } from '../utils/imageHelper';
 
 const DashboardView = ({ user, profile, apiBaseUrl, onLogout, onProductChanged }) => {
   const [activeTab, setActiveTab] = useState('');
@@ -995,10 +996,10 @@ const DashboardView = ({ user, profile, apiBaseUrl, onLogout, onProductChanged }
                           <div className="flex items-center gap-3">
                             <div className="w-12 h-12 bg-white rounded-xl overflow-hidden shrink-0 border border-gray-200 flex items-center justify-center">
                               <img
-                                src={prod.image ? prod.image : 'images/toor-dal.png'}
+                                src={resolveImage(prod.image)}
                                 alt={prod.name}
                                 className="w-full h-full object-cover"
-                                onError={(e) => { e.target.src = 'images/toor-dal.png'; }}
+                                onError={(e) => { e.target.src = resolveImage('images/toor-dal.png'); }}
                               />
                             </div>
                             <div>

@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { ShoppingCart, Heart, Eye, Star } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { resolveImage } from '../utils/imageHelper';
 
 const ProductCard = ({ product }) => {
   const [imgError, setImgError] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
 
-  const fallbackImage = 'images/toor-dal.png';
 
   return (
     <motion.div 
@@ -17,7 +17,7 @@ const ProductCard = ({ product }) => {
       {/* Product Image Area */}
       <div className="relative aspect-[4/3] overflow-hidden bg-gray-50">
         <img 
-          src={imgError ? fallbackImage : product.image} 
+          src={imgError ? resolveImage('images/toor-dal.png') : resolveImage(product.image)} 
           alt={product.name}
           onError={() => setImgError(true)}
           loading="lazy"

@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Check, Star, Users, Truck, Clock } from 'lucide-react';
+import { resolveImage } from '../utils/imageHelper';
 
 const About = () => {
   const features = [
@@ -20,8 +21,8 @@ const About = () => {
               whileInView={{ opacity: 1, scale: 1 }}
               className="relative z-10 grid grid-cols-2 gap-4"
             >
-              <img src="images/about-grains.png" alt="Premium grain varieties displayed in our shop" className="rounded-3xl shadow-lg mt-8 object-cover h-60 w-full" loading="lazy" />
-              <img src="images/about-quality.png" alt="Farmer inspecting premium quality wheat" className="rounded-3xl shadow-lg object-cover h-60 w-full" loading="lazy" />
+              <img src={resolveImage("images/about-grains.png")} alt="Premium grain varieties displayed in our shop" className="rounded-3xl shadow-lg mt-8 object-cover h-60 w-full" loading="lazy" />
+              <img src={resolveImage("images/about-quality.png")} alt="Farmer inspecting premium quality wheat" className="rounded-3xl shadow-lg object-cover h-60 w-full" loading="lazy" />
             </motion.div>
             
             {/* Background accent */}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, ShoppingCart, Heart, Star, ArrowLeft, Send, Check, ShieldAlert, BadgeAlert } from 'lucide-react';
+import { Search, ShoppingCart, Heart, Star, ArrowLeft, Send, Check, ShieldAlert, BadgeAlert, Loader } from 'lucide-react';
+import { resolveImage } from '../utils/imageHelper';
 
 const ShopView = ({ apiBaseUrl, user, onAddToCart, onToggleWishlist, wishlistSlugs }) => {
   const [products, setProducts] = useState([]);
@@ -164,10 +165,10 @@ const ShopView = ({ apiBaseUrl, user, onAddToCart, onToggleWishlist, wishlistSlu
               {/* Product Image Gallery */}
               <div className="lg:col-span-5 relative bg-gray-50 rounded-3xl overflow-hidden aspect-[4/3] border border-gray-100 flex items-center justify-center">
                 <img 
-                  src={selectedProduct.image ? selectedProduct.image : 'images/toor-dal.png'} 
+                  src={resolveImage(selectedProduct.image)} 
                   alt={selectedProduct.name}
                   className="w-full h-full object-cover"
-                  onError={(e) => { e.target.src = 'images/toor-dal.png'; }}
+                  onError={(e) => { e.target.src = resolveImage('images/toor-dal.png'); }}
                 />
                 
                 <div className="absolute top-4 left-4 flex flex-col gap-2">
@@ -435,10 +436,10 @@ const ShopView = ({ apiBaseUrl, user, onAddToCart, onToggleWishlist, wishlistSlu
                       className="relative aspect-[4/3] overflow-hidden bg-gray-50 cursor-pointer"
                     >
                       <img 
-                        src={prod.image ? prod.image : 'images/toor-dal.png'} 
+                        src={resolveImage(prod.image)} 
                         alt={prod.name}
                         className="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
-                        onError={(e) => { e.target.src = 'images/toor-dal.png'; }}
+                        onError={(e) => { e.target.src = resolveImage('images/toor-dal.png'); }}
                       />
                       
                       <div className="absolute top-3 left-3">

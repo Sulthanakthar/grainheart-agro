@@ -1,6 +1,7 @@
 import React from 'react';
 import { ShoppingBag, Trash2, Plus, Minus, ArrowRight, ShoppingCart } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { resolveImage } from '../utils/imageHelper';
 
 const CartView = ({ cart, onUpdateCartQty, onRemoveCartItem, onCheckout, onBrowseShop }) => {
   const items = cart?.items || [];
@@ -40,10 +41,10 @@ const CartView = ({ cart, onUpdateCartQty, onRemoveCartItem, onCheckout, onBrows
                   <div className="flex items-center gap-4 self-start sm:self-center">
                     <div className="w-20 h-20 bg-gray-50 rounded-2xl overflow-hidden shrink-0 border border-gray-100 flex items-center justify-center">
                       <img
-                        src={item.product_details?.image ? item.product_details.image : 'images/toor-dal.png'}
+                        src={resolveImage(item.product_details?.image)}
                         alt={item.product_name}
                         className="w-full h-full object-cover"
-                        onError={(e) => { e.target.src = 'images/toor-dal.png'; }}
+                        onError={(e) => { e.target.src = resolveImage('images/toor-dal.png'); }}
                       />
                     </div>
                     <div>
